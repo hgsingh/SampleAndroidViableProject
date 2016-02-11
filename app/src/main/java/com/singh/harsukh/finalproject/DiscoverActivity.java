@@ -29,6 +29,8 @@ public class DiscoverActivity extends AppCompatActivity implements AdapterView.O
     private ListView listView = null;
     private ArrayList<SingleRow> arrayList = null;
     private static Handler message_handler = null;
+    private Bitmap thumb = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,6 +61,15 @@ public class DiscoverActivity extends AppCompatActivity implements AdapterView.O
         return activity_intent;
     }
 
+    protected void setBitmap(Bitmap bm)
+    {
+        thumb = bm;
+    }
+
+    protected Bitmap getBitmap()
+    {
+        return thumb;
+    }
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id)
     {
@@ -68,7 +79,6 @@ public class DiscoverActivity extends AppCompatActivity implements AdapterView.O
             Bundle args = new Bundle();
             String _id = arrayList.get(position).getId();
             String desc = arrayList.get(position).description;
-            final Bitmap thumb;
             String thumbnail_url = "https://image.tmdb.org/t/p/w300"+_id;
 
             Thread download_thread = new Thread(new DownloadThread(thumbnail_url));
@@ -82,13 +92,16 @@ public class DiscoverActivity extends AppCompatActivity implements AdapterView.O
 //                    thumb = (Bitmap) msg.obj;
 //                }
 //            };
-            Message msg = message_handler.obtainMessage();
-            thumb = (Bitmap) msg.obj;
-            args.putString("description", desc);
-            args.putParcelable("image", thumb);
-            detailDialog.setArguments(args);
-            detailDialog.show(manager,"MovieDetailDialog");
-
+            thumb = getBitmap();
+//            Message message = message_handler.obtainMessage();
+//            thumb = (Bitmap) message.obj;
+            if(thumb!=null) {
+                Log.d("DiscoverActivity", "Here I am");
+                args.putString("description", desc);
+                args.putParcelable("image", thumb);
+                detailDialog.setArguments(args);
+                detailDialog.show(manager, "MovieDetailDialog");
+            }
         }
     }
 
@@ -107,6 +120,7 @@ public class DiscoverActivity extends AppCompatActivity implements AdapterView.O
     private class DownloadThread implements Runnable
     {
         private String _url = null;
+        private Bitmap thumb = null;
         public DownloadThread(Object param)
         {
             _url = (String)param;
@@ -116,7 +130,6 @@ public class DiscoverActivity extends AppCompatActivity implements AdapterView.O
             URL downloadUrl = null; //initially set object to null
             HttpURLConnection conn = null;
             InputStream inputStream = null;
-            Bitmap thumb = null;
             if(_url != null) {
                 try {
                     downloadUrl = new URL(_url);
@@ -129,11 +142,17 @@ public class DiscoverActivity extends AppCompatActivity implements AdapterView.O
                     e.printStackTrace();
                 }
                 finally {
-                    if(thumb != null) {
-                        Message message = Message.obtain();
-                        message.obj = thumb;
-                        message_handler.sendMessage(message);
-                    }
+                    message_handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            setBitmap(thumb);
+                        }
+                    });
+//                    if(thumb != null) {
+//                        Message message = Message.obtain();
+//                        message.obj = thumb;
+//                        message_handler.sendMessage(message);
+//                    }
                 }
             }
         }

@@ -17,23 +17,27 @@ public class MovieDetailDialog extends DialogFragment
 {
     private ImageView imageView;
     private TextView textView;
-
+    private Bitmap bitmap;
+    private String description;
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        this.description = getArguments().getString("description");
+        System.out.println(description);
+        this.bitmap= getArguments().getParcelable("image");
+    }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        if(savedInstanceState != null) {
-            View v = inflater.inflate(R.layout.movie_detail, container);
-            imageView = (ImageView) v.findViewById(R.id.popularMovieView);
-            textView = (TextView) v.findViewById(R.id.popularMovieDesc);
-            String description = getArguments().getString("description");
-            textView.setText(description);
-            Bitmap thumb = getArguments().getParcelable("image");
-            imageView.setImageBitmap(thumb);
-            setCancelable(true);
-            getDialog().setTitle("Popular Movies");
-            return v;
-        }
-        return super.onCreateView(inflater, container, savedInstanceState);
+
+        View v = inflater.inflate(R.layout.movie_detail, container);
+        imageView = (ImageView) v.findViewById(R.id.popularMovieView);
+        textView = (TextView) v.findViewById(R.id.popularMovieDesc);
+        textView.setText(description);
+        imageView.setImageBitmap(bitmap);
+        setCancelable(true);
+        getDialog().setTitle("Popular Movies");
+        return v;
     }
 }
