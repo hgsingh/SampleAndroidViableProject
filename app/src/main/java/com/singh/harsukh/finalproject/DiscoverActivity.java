@@ -8,6 +8,9 @@ import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,6 +28,7 @@ import java.util.ArrayList;
 public class DiscoverActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
     private ListView listView = null;
     private ArrayList<SingleRow> arrayList = null;
+    private static Handler message_handler = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,15 +39,18 @@ public class DiscoverActivity extends AppCompatActivity implements AdapterView.O
             Download discover_download = new Download(this);
             discover_download.execute("moviedb", getResources().getString(R.string.tmdb_key));
             Log.d("DiscoverActivity", "Task Completed");
-            if(arrayList != null)
-                listView.setAdapter(new ListAdapter( DiscoverActivity.this, arrayList));
+//            if(arrayList != null)
+//                listView.setAdapter(new ListAdapter( DiscoverActivity.this, arrayList));
             listView.setOnItemClickListener(this);
+            message_handler = new Handler();
         }
     }
 
     protected void setArrayList(ArrayList arrayList)
     {
         this.arrayList = arrayList;
+        listView.setAdapter(new ListAdapter( DiscoverActivity.this, arrayList));
+
     }
 
     public static Intent getActivity(Context context)
@@ -58,34 +65,30 @@ public class DiscoverActivity extends AppCompatActivity implements AdapterView.O
 
         if(isConnected())
         {
-            Uri.Builder builder = new Uri.Builder();
-            URL download_url = null;
             Bundle args = new Bundle();
             String _id = arrayList.get(position).getId();
             String desc = arrayList.get(position).description;
-            builder.scheme("https")
-                    .authority("image.tmdb.org")
-                    .appendPath("t")
-                    .appendPath("p")
-                    .appendPath("w150")
-                    .appendPath(_id);
-            String thumbnail_url = builder.build().toString();
-            try {
-                download_url = new URL(thumbnail_url);
-                HttpURLConnection conn = (HttpURLConnection) download_url.openConnection();
-                InputStream inputStream = conn.getInputStream();
-                Bitmap thumb = BitmapFactory.decodeStream(inputStream);
-                FragmentManager manager = getFragmentManager();
-                MovieDetailDialog detailDialog = new MovieDetailDialog();
-                args.putString("description", desc);
-                args.putParcelable("image", thumb);
-                detailDialog.setArguments(args);
-                detailDialog.show(manager,"MovieDetailDialog");
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            final Bitmap thumb;
+            String thumbnail_url = "https://image.tmdb.org/t/p/w300"+_id;
+
+            Thread download_thread = new Thread(new DownloadThread(thumbnail_url));
+            download_thread.start();
+            FragmentManager manager = getFragmentManager();
+            MovieDetailDialog detailDialog = new MovieDetailDialog();
+//            message_handler = new Handler(Looper.getMainLooper()) {
+//                @Override
+//                public void handleMessage(Message msg) {
+//                    //get bitmap object from the handler
+//                    thumb = (Bitmap) msg.obj;
+//                }
+//            };
+            Message msg = message_handler.obtainMessage();
+            thumb = (Bitmap) msg.obj;
+            args.putString("description", desc);
+            args.putParcelable("image", thumb);
+            detailDialog.setArguments(args);
+            detailDialog.show(manager,"MovieDetailDialog");
+
         }
     }
 
@@ -99,5 +102,40 @@ public class DiscoverActivity extends AppCompatActivity implements AdapterView.O
             return true;
         }
         return false;
+    }
+
+    private class DownloadThread implements Runnable
+    {
+        private String _url = null;
+        public DownloadThread(Object param)
+        {
+            _url = (String)param;
+        }
+        @Override
+        public void run() {
+            URL downloadUrl = null; //initially set object to null
+            HttpURLConnection conn = null;
+            InputStream inputStream = null;
+            Bitmap thumb = null;
+            if(_url != null) {
+                try {
+                    downloadUrl = new URL(_url);
+                    conn = (HttpURLConnection) downloadUrl.openConnection();
+                    inputStream = conn.getInputStream();
+                    thumb = BitmapFactory.decodeStream(inputStream);
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                finally {
+                    if(thumb != null) {
+                        Message message = Message.obtain();
+                        message.obj = thumb;
+                        message_handler.sendMessage(message);
+                    }
+                }
+            }
+        }
     }
 }
