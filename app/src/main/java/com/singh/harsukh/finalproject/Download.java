@@ -195,17 +195,17 @@ public class Download extends AsyncTask<String, Integer, ArrayList> {
         if(arrayList != null && arrayList.get(0) instanceof SingleRow ) {//bad monkey no banana for you (really bad programming)
             if (tag.equals("instagram")) {
                 activity.startAfterDownload("instagram", arrayList);
-                tag = null;
+                tag = "";
             }
             if (tag.equals("moviedb")) {
                 discover_activity.setArrayList(arrayList);
-                tag = null;
+                tag = "";
             }
         }
         if(arrayList != null && arrayList.get(0) instanceof Bitmap)
         {
             star_activity.setUserImages(arrayList);
-            tag = null;
+            tag = "";
         }
     }
 

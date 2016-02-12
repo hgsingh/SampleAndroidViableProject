@@ -22,14 +22,15 @@ public class StarActivity extends AppCompatActivity {
     private static String TAG = "StarActivity";
     private ViewPager viewPager;
     private ArrayList<Bitmap> user_images = null;
-
+    private ListGridAdapter adapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_star);
         Log.e(TAG, "Star Activitiy Created", new Exception());
         viewPager = (ViewPager) findViewById(R.id.pager);
-        viewPager.setAdapter(new ListGridAdapter(getSupportFragmentManager(), StarActivity.this));
+        adapter = new ListGridAdapter(getSupportFragmentManager(), StarActivity.this);
+        viewPager.setAdapter(adapter);
 
         //listView = (ListView) findViewById(R.id.listView);
         list_images = getIntent().getParcelableArrayListExtra("imageObjects");
@@ -51,16 +52,19 @@ public class StarActivity extends AppCompatActivity {
     public void setUserImages(ArrayList<Bitmap> user_images)
     {
         this.user_images = user_images;
+        System.out.print(user_images.get(0));
+        viewPager.setAdapter(adapter);
+        viewPager.setCurrentItem(1, true);
     }
 
-    public ArrayList<Bitmap> getUser_images()
-    {
-        if(user_images != null)
-        {
-            return user_images;
-        }
-        return null;
-    }
+//    public ArrayList<Bitmap> getUser_images()
+//    {
+//        if(user_images != null)
+//        {
+//            return user_images;
+//        }
+//        return null;
+//    }
 
     class ListGridAdapter extends FragmentStatePagerAdapter
     {
@@ -74,10 +78,11 @@ public class StarActivity extends AppCompatActivity {
         @Override
         public Fragment getItem(int position) 
         {
-            position = position % 2;
+            //position = position % 2;
             Fragment reference = null;
             if(position == 0)
             {
+                Log.e("StarActivity","Fragment at position: "+ position);
                 //// TODO: 2/7/16
                 ListFragment.setContext(context);
                 reference = new ListFragment();
@@ -89,8 +94,15 @@ public class StarActivity extends AppCompatActivity {
             }
             if(position == 1)
             {
+                Log.e("StarActivity", "Fragment at position: " + position);
                 //// TODO: 2/7/16
+                GridFragment.setContext(context);
+
                 reference = new GridFragment();
+                if(user_images != null)
+                {
+                    ((GridFragment) reference).setBitmap(user_images);
+                }
             }
             return reference;
         }

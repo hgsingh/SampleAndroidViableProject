@@ -21,7 +21,9 @@ import java.util.ArrayList;
 public class GridFragment extends Fragment
 {
     private GridView gridView;
-    private static StarActivity activity;
+//    private static StarActivity activity;
+    private static Context context;
+    private ArrayList<Bitmap> bitmap;
     public GridFragment()
     {
         super();
@@ -32,11 +34,10 @@ public class GridFragment extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.frag_tab_grid, container, false);
         gridView = (GridView) v.findViewById(R.id.gridview);
-        activity = (StarActivity) getActivity();
-        final ArrayList<Bitmap> imageArray = activity.getUser_images();
-        if(imageArray != null)
+//        activity = (StarActivity) getActivity();
+        if(bitmap != null)
         {
-            gridView.setAdapter(new ImageAdapter(getContext(), imageArray));
+            gridView.setAdapter(new ImageAdapter(context, bitmap));
         }
         else
         {
@@ -44,11 +45,20 @@ public class GridFragment extends Fragment
         }
         return v;
     }
+    public static void setContext(Context local_context)
+    {
+        context = local_context;
+    }
 
+    public void setBitmap(ArrayList arrayList)
+    {
+        this.bitmap = arrayList;
+    }
     private class ImageAdapter extends BaseAdapter
     {
         private Context context;
         private ArrayList<Bitmap> imageArray;
+
         public ImageAdapter(Context context, ArrayList imageArray)
         {
             this.context = context;
@@ -77,9 +87,9 @@ public class GridFragment extends Fragment
             if(convertView == null)
             {
                 imageView = new ImageView(context);
-                imageView.setLayoutParams(new GridView.LayoutParams(100, 100));
+                imageView.setLayoutParams(new GridView.LayoutParams(185, 185));
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                imageView.setPadding(10,10,10,10);
+                imageView.setPadding(8,8,8,8);
             }
             else
             {

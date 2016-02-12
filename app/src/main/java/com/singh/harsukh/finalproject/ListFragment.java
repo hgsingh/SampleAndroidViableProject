@@ -22,7 +22,7 @@ public class ListFragment extends Fragment implements AdapterView.OnItemClickLis
     private ListView listView;
     private ArrayList<SingleRow> arrayList;
     private static Context context;
-    private View v;
+    //private View v;
     public ListFragment()
     {
         super();
@@ -36,8 +36,13 @@ public class ListFragment extends Fragment implements AdapterView.OnItemClickLis
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        v = (View) inflater.inflate(R.layout.frag_tab_list, container, false);
+        View v = (View) inflater.inflate(R.layout.frag_tab_list, container, false);
         listView = (ListView) v.findViewById(R.id.listView);
+        if(arrayList != null && context != null) {
+            listView.setAdapter(new ListAdapter(context, arrayList));
+        }
+        else
+            Log.e("ListFragment", "null values");
         listView.setOnItemClickListener(this);
         return v;
     }
@@ -49,17 +54,12 @@ public class ListFragment extends Fragment implements AdapterView.OnItemClickLis
     public void setImages(ArrayList<SingleRow> images)
     {
         this.arrayList = images;
-        listView = (ListView) v.findViewById(R.id.listView);
-        if(images != null && context != null) {
-            listView.setAdapter(new ListAdapter(context, images));
-        }
-        else
-            Log.e("ListFragment", "null values");
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id)
     {
+        Log.e("ListFragment", "Item clicked at position: "+position);
         String _id = arrayList.get(position).getId();
         Download downloader = new Download((StarActivity)getActivity());
         downloader.execute("recentImages", _id,getResources().getString(R.string.insta_client_id));

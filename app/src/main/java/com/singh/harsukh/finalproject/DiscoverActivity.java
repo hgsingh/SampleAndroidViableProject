@@ -79,7 +79,7 @@ public class DiscoverActivity extends AppCompatActivity implements AdapterView.O
             Bundle args = new Bundle();
             String _id = arrayList.get(position).getId();
             String desc = arrayList.get(position).description;
-            String thumbnail_url = "https://image.tmdb.org/t/p/w300"+_id;
+            String thumbnail_url = "https://image.tmdb.org/t/p/w500"+_id;
 
             Thread download_thread = new Thread(new DownloadThread(thumbnail_url));
             download_thread.start();
