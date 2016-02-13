@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements View.OnFocusChang
 
     public void goToSearch(View view)
     {
-        if(view.getId() == R.id.button3)
+        if(view.getId() == R.id.button5)
         {
             String query = mEditTextA.getText().toString();
             if(!query.equals(""))
@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements View.OnFocusChang
                 startActivity(actor_intent);
             }
         }
-        if(view.getId() == R.id.button5)
+        if(view.getId() == R.id.button3)
         {
             String query = mEditTextC.getText().toString();
             if(!query.equals(""))
