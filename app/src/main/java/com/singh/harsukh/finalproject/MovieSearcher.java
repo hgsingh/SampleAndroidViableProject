@@ -77,7 +77,7 @@ public class MovieSearcher extends AppCompatActivity
     }
     private class QueryManager extends AsyncTask<String, Void, ArrayList>
     {
-        private String tag;
+        private String tag = null;
         @Override
         protected ArrayList doInBackground(String... params)
         {
@@ -91,10 +91,10 @@ public class MovieSearcher extends AppCompatActivity
                     }
                 }
                 if (tag.equals("actor")) {
-
+                    //// TODO: 2/13/16          
                 }
                 if (tag.equals("genre")) {
-
+                    //// TODO: 2/13/16  
                 }
             }
             return null;
