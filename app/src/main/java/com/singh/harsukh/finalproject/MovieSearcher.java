@@ -11,6 +11,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import org.json.JSONArray;
@@ -31,12 +33,15 @@ public class MovieSearcher extends AppCompatActivity
 {
     //private String query;
     public final static String DEBUG_TAG = "MovieSearcher";
+    private static String query_tag = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.movie_search_layout);
         Intent initialization_intent = getIntent();
         String query = null;
         String initializer = initialization_intent.getStringExtra(MainActivity.query_code);
+        query_tag = initializer;
         if(initializer.equals("actor"))
         {
             query = initialization_intent.getStringExtra("actor_name");
@@ -72,25 +77,25 @@ public class MovieSearcher extends AppCompatActivity
     }
     private class QueryManager extends AsyncTask<String, Void, ArrayList>
     {
-
+        private String tag;
         @Override
         protected ArrayList doInBackground(String... params)
         {
-            if(params[0].equals("movie"))
-            {
-                try {
-                    return searchTMDB(params[1], params[2]);
-                } catch (IOException e) {
-                    return null;
+            tag = params[0];
+            if(tag != null) {
+                if (tag.equals("movie")) {
+                    try {
+                        return searchTMDB(params[1], params[2]);
+                    } catch (IOException e) {
+                        return null;
+                    }
                 }
-            }
-            if(params[0].equals("actor"))
-            {
+                if (tag.equals("actor")) {
 
-            }
-            if(params[0].equals("genre"))
-            {
+                }
+                if (tag.equals("genre")) {
 
+                }
             }
             return null;
         }
@@ -161,5 +166,28 @@ public class MovieSearcher extends AppCompatActivity
             BufferedReader bufferedReader = new BufferedReader(reader);
             return bufferedReader.readLine();
         }
+
+        @Override
+        protected void onPostExecute(ArrayList arrayList) {
+            updateViewWithResults(arrayList, tag);
+        }
     }
+    /**
+     * Updates the View with the results. This is called asynchronously
+     * when the results are ready.
+     * @param result The results to be presented to the user.
+     */
+    public void updateViewWithResults(ArrayList result, String tag) {
+        ListView listView = new ListView(this);
+        Log.d("updateViewWithResults", result.toString());
+        // Add results to listView.
+        if(tag.equals(query_tag)) {
+            ArrayAdapter<MovieResult> adapter =
+                    new ArrayAdapter<MovieResult>(this, android.R.layout.simple_list_item_1, result);
+            listView.setAdapter(adapter);
+        }
+        // Update Activity to show listView
+        setContentView(listView);
+    }
+
 }
