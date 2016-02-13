@@ -22,22 +22,51 @@
         android:gravity="center_horizontal"
         android:layout_gravity="center_horizontal"/>
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Go"
+        android:id="@+id/button5"
+        android:onClick="goToSearch"
+        android:layout_marginTop="5dp"
+        android:layout_gravity="center_horizontal"/>
+
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/editText2"
-        android:layout_marginTop="75dp"
+        android:layout_marginTop="40dp"
         android:hint = "Enter Actor Name"
         android:gravity="center_horizontal"
         android:layout_gravity="center_horizontal"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Go"
+        android:id="@+id/button4"
+        android:onClick="goToSearch"
+        android:layout_marginTop="5dp"
+        android:layout_gravity="center_horizontal"/>
+
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/editText3"
-        android:layout_marginTop="75dp"
+        android:layout_marginTop="40dp"
         android:hint = "Enter Movie Genre"
         android:gravity="center_horizontal"
         android:layout_gravity="center_horizontal"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Go"
+        android:id="@+id/button3"
+        android:onClick="goToSearch"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="5dp"/>
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -45,5 +74,6 @@
         android:id="@+id/button"
         android:onClick="startDiscoverActivity"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="100dp"/>
+        android:layout_marginTop="25dp"/>
+
 </LinearLayout>

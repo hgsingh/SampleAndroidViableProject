@@ -20,6 +20,7 @@ public class MainActivity extends AppCompatActivity implements View.OnFocusChang
     private EditText mEditTextA;
     private EditText mEditTextB;
     private EditText mEditTextC;
+    public static String query_code = "com.singh.harsukh.MainActivity";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,11 +28,12 @@ public class MainActivity extends AppCompatActivity implements View.OnFocusChang
         mEditTextA = (EditText) findViewById(R.id.editText);
         mEditTextC = (EditText) findViewById(R.id.editText3);
         mEditTextB = (EditText) findViewById(R.id.editText2);
-
+        mEditTextA.setText("");
+        mEditTextB.setText("");
+        mEditTextC.setText("");
         mEditTextA.setOnFocusChangeListener(this);
         mEditTextB.setOnFocusChangeListener(this);
         mEditTextB.setOnFocusChangeListener(this);
-
     }
 
     public void startDiscoverActivity(View v)
@@ -45,19 +47,13 @@ public class MainActivity extends AppCompatActivity implements View.OnFocusChang
     {
         if(!hasFocus) {
             if (v.getId() == R.id.editText) {
-                //TODO
-                //implement spinners here
-                Toast.makeText(this, "Hello This is a test", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Press Go!!!!", Toast.LENGTH_SHORT).show();
             }
             if (v.getId() == R.id.editText2) {
-                //TODO
-                //implement spinners here
-                Toast.makeText(this, "Hello This is a test", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Press Go!!!!", Toast.LENGTH_SHORT).show();
             }
             if (v.getId() == R.id.editText3) {
-                //TODO
-                // implement spinners here
-                Toast.makeText(this, "Hello This is a test", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Press Go!!!!", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -101,4 +97,42 @@ public class MainActivity extends AppCompatActivity implements View.OnFocusChang
             startActivity(intent);
         }
     }
+
+    public void goToSearch(View view)
+    {
+        if(view.getId() == R.id.button3)
+        {
+            String query = mEditTextA.getText().toString();
+            if(!query.equals(""))
+            {
+                Intent movie_intent = MovieSearcher.getActivity(getApplicationContext());
+                movie_intent.putExtra("movie_name", query);
+                movie_intent.putExtra(query_code, "movie");
+                startActivity(movie_intent);
+            }
+        }
+        if(view.getId() == R.id.button4)
+        {
+            String query = mEditTextB.getText().toString();
+            if(!query.equals(""))
+            {
+                Intent actor_intent = MovieSearcher.getActivity(getApplicationContext());
+                actor_intent.putExtra("actor_name", query);
+                actor_intent.putExtra(query_code, "actor");
+                startActivity(actor_intent);
+            }
+        }
+        if(view.getId() == R.id.button5)
+        {
+            String query = mEditTextC.getText().toString();
+            if(!query.equals(""))
+            {
+                Intent genre_intent = MovieSearcher.getActivity(getApplicationContext());
+                genre_intent.putExtra("genre_name", query);
+                genre_intent.putExtra(query_code,"genre");
+                startActivity(genre_intent);
+            }
+        }
+    }
+
 }
