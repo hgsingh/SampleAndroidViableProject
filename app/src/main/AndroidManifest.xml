@@ -20,6 +20,8 @@
         </activity>
         <activity android:name=".StarActivity">
         </activity>
+        <activity android:name=".MovieSearcher">
+        </activity>
     </application>
 
 </manifest>
