@@ -282,9 +282,7 @@ public class MovieSearcher extends AppCompatActivity
         }
         if(tag.equals("actor"))
         {
-            ArrayAdapter<SingleRow> adapter =
-                    new ArrayAdapter<SingleRow>(this, R.layout.single_row, result);
-            listView.setAdapter(adapter);
+            listView.setAdapter(new ListAdapter(this, result));
         }
         // Update Activity to show listView
         setContentView(listView);
