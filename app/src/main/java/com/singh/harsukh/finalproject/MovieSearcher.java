@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -86,7 +87,7 @@ public class MovieSearcher extends AppCompatActivity
         {
             tag = params[0];
             if(tag != null) {
-                if (tag.equals("movie") || tag.equals("actor")) {
+                if (tag.equals("movie")) {
                     try {
                         return searchTMDB(params[0],params[1], params[2]);
                     } catch (IOException e) {
@@ -111,14 +112,16 @@ public class MovieSearcher extends AppCompatActivity
         }
 
         public ArrayList searchActors(String query_type, String query, String TMDB_API_KEY) throws IOException {
-            StringBuilder stringBuilder = new StringBuilder();
-            if (query_type.equals("actor")) {
-                stringBuilder.append("http://api.themoviedb.org/3/search/person");
-                stringBuilder.append("?api_key=" + TMDB_API_KEY);
-                stringBuilder.append("&query=" + query);
-            }
-            URL url = new URL(stringBuilder.toString());
+            Uri.Builder builder = new Uri.Builder();
+            builder.scheme("https")
+                    .authority("api.themoviedb.org")
+                    .appendPath("3")
+                    .appendPath("search")
+                    .appendPath("person")
+                    .appendQueryParameter("api_key", TMDB_API_KEY)
+                    .appendQueryParameter("query", query);
 
+            URL url = new URL(builder.build().toString());
             InputStream stream = null;
             try {
                 // Establish a connection
@@ -150,13 +153,22 @@ public class MovieSearcher extends AppCompatActivity
         public ArrayList<MovieResult> searchTMDB(String query_type, String query, String TMDB_API_KEY) throws IOException {
             // Build URL
 
-            StringBuilder stringBuilder = new StringBuilder();
-            if (query_type.equals("movie")) {
-                stringBuilder.append("http://api.themoviedb.org/3/search/movie");
-                stringBuilder.append("?api_key=" + TMDB_API_KEY);
-                stringBuilder.append("&query=" + query);
-            }
-            URL url = new URL(stringBuilder.toString());
+//            StringBuilder stringBuilder = new StringBuilder();
+//            if (query_type.equals("movie")) {
+//                stringBuilder.append("http://api.themoviedb.org/3/search/movie");
+//                stringBuilder.append("?api_key=" + TMDB_API_KEY);
+//                stringBuilder.append("&query=" + query);
+//            }
+            Uri.Builder builder = new Uri.Builder();
+            builder.scheme("https")
+                    .authority("api.themoviedb.org")
+                    .appendPath("3")
+                    .appendPath("search")
+                    .appendPath("movie")
+                    .appendQueryParameter("api_key", TMDB_API_KEY)
+                    .appendQueryParameter("query", query);
+
+            URL url = new URL(builder.build().toString());
 
             InputStream stream = null;
             try {
@@ -192,8 +204,8 @@ public class MovieSearcher extends AppCompatActivity
                 {
                     JSONObject object = array.getJSONObject(i);
                     String image_path = object.getString("profile_path");
-                    String title = object.getString("id");
-                    String desc = object.getString("overview");
+                    String title = object.getString("name");
+                    String desc = object.getString("popularity");
                     String thumbnail_url = "https://image.tmdb.org/t/p/w45"+image_path;
                     URL downloadURL = new URL(thumbnail_url);
                     HttpURLConnection conn = (HttpURLConnection) downloadURL.openConnection();

@@ -148,6 +148,7 @@ public class DiscoverActivity extends AppCompatActivity implements AdapterView.O
                             setBitmap(thumb);
                         }
                     });
+                    //message_handler.notifyAll();
 //                    if(thumb != null) {
 //                        Message message = Message.obtain();
 //                        message.obj = thumb;
