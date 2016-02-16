@@ -5,6 +5,8 @@ package com.singh.harsukh.finalproject;
  */
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -26,6 +28,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -83,15 +86,22 @@ public class MovieSearcher extends AppCompatActivity
         {
             tag = params[0];
             if(tag != null) {
-                if (tag.equals("movie")) {
+                if (tag.equals("movie") || tag.equals("actor")) {
                     try {
-                        return searchTMDB(params[1], params[2]);
+                        return searchTMDB(params[0],params[1], params[2]);
                     } catch (IOException e) {
                         return null;
                     }
                 }
-                if (tag.equals("actor")) {
-                    //// TODO: 2/13/16          
+                if(tag.equals("actor"))
+                {
+                    try {
+                        return searchActors(params[0], params[1], params[2]);
+                    }
+                    catch(IOException e)
+                    {
+                        return null;
+                    }
                 }
                 if (tag.equals("genre")) {
                     //// TODO: 2/13/16  
@@ -99,17 +109,53 @@ public class MovieSearcher extends AppCompatActivity
             }
             return null;
         }
+
+        public ArrayList searchActors(String query_type, String query, String TMDB_API_KEY) throws IOException {
+            StringBuilder stringBuilder = new StringBuilder();
+            if (query_type.equals("actor")) {
+                stringBuilder.append("http://api.themoviedb.org/3/search/person");
+                stringBuilder.append("?api_key=" + TMDB_API_KEY);
+                stringBuilder.append("&query=" + query);
+            }
+            URL url = new URL(stringBuilder.toString());
+
+            InputStream stream = null;
+            try {
+                // Establish a connection
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setReadTimeout(10000 /* milliseconds */);
+                conn.setConnectTimeout(15000 /* milliseconds */);
+                conn.setRequestMethod("GET");
+                conn.addRequestProperty("Accept", "application/json"); // Required to get TMDB to play nicely.
+                conn.setDoInput(true);
+                conn.connect();
+
+                int responseCode = conn.getResponseCode();
+                Log.d(DEBUG_TAG, "The response code is: " + responseCode + " " + conn.getResponseMessage());
+
+                stream = conn.getInputStream();
+                return parseActor(stringify(stream));
+            }
+            finally {
+                if (stream != null) {
+                    stream.close();
+                }
+            }
+        }
         /**
          * Searches IMDBs API for the given query
          * @param query The query to search.
          * @return A list of all hits.
          */
-        public ArrayList<MovieResult> searchTMDB(String query, String TMDB_API_KEY) throws IOException {
+        public ArrayList<MovieResult> searchTMDB(String query_type, String query, String TMDB_API_KEY) throws IOException {
             // Build URL
+
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("http://api.themoviedb.org/3/search/movie");
-            stringBuilder.append("?api_key=" + TMDB_API_KEY);
-            stringBuilder.append("&query=" + query);
+            if (query_type.equals("movie")) {
+                stringBuilder.append("http://api.themoviedb.org/3/search/movie");
+                stringBuilder.append("?api_key=" + TMDB_API_KEY);
+                stringBuilder.append("&query=" + query);
+            }
             URL url = new URL(stringBuilder.toString());
 
             InputStream stream = null;
@@ -135,7 +181,43 @@ public class MovieSearcher extends AppCompatActivity
             }
         }
 
-        private ArrayList<MovieResult> parseResult(String result) {
+        private ArrayList<SingleRow> parseActor(String stream)
+        {
+            String streamAsString = stream;
+            ArrayList<SingleRow> results = new ArrayList<>();
+            try{
+                JSONObject jsonObject = new JSONObject(streamAsString);
+                JSONArray array = (JSONArray) jsonObject.get("results");
+                for(int i = 0; i < array.length(); ++i)
+                {
+                    JSONObject object = array.getJSONObject(i);
+                    String image_path = object.getString("profile_path");
+                    String title = object.getString("id");
+                    String desc = object.getString("overview");
+                    String thumbnail_url = "https://image.tmdb.org/t/p/w45"+image_path;
+                    URL downloadURL = new URL(thumbnail_url);
+                    HttpURLConnection conn = (HttpURLConnection) downloadURL.openConnection();
+                    InputStream inputStream = conn.getInputStream();
+                    Bitmap thumb = BitmapFactory.decodeStream(inputStream);
+                    thumb = Bitmap.createScaledBitmap(thumb,50,50,false);
+                    SingleRow singleRow = new SingleRow(title, desc, thumb);
+                    singleRow.setId(image_path);
+                    results.add(singleRow);
+                }
+            }
+            catch(JSONException e)
+            {
+                e.printStackTrace();
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        private ArrayList<MovieResult> parseResult(String result)
+        {
             String streamAsString = result;
             ArrayList<MovieResult> results = new ArrayList<MovieResult>();
             try {
@@ -181,9 +263,15 @@ public class MovieSearcher extends AppCompatActivity
         ListView listView = new ListView(this);
         Log.d("updateViewWithResults", result.toString());
         // Add results to listView.
-        if(tag.equals(query_tag)) {
+        if(tag.equals("movie")) {
             ArrayAdapter<MovieResult> adapter =
                     new ArrayAdapter<MovieResult>(this, android.R.layout.simple_list_item_1, result);
+            listView.setAdapter(adapter);
+        }
+        if(tag.equals("actor"))
+        {
+            ArrayAdapter<SingleRow> adapter =
+                    new ArrayAdapter<SingleRow>(this, R.layout.single_row, result);
             listView.setAdapter(adapter);
         }
         // Update Activity to show listView

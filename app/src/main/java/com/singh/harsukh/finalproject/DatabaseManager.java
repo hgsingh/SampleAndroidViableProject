@@ -15,7 +15,7 @@ public class DatabaseManager {
     public class DBHelper extends SQLiteOpenHelper
     {
         private static final String DATABASE_NAME = "keywordDatabase";
-        public DBHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
+        public DBHelper(Context context) {
             super(context,DATABASE_NAME , null, 1);
         }
 
@@ -25,8 +25,9 @@ public class DatabaseManager {
         }
 
         @Override
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
+        {
+            //do nothing
         }
     }
 }
