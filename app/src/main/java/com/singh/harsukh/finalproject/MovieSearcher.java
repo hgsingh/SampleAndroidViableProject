@@ -225,7 +225,7 @@ public class MovieSearcher extends AppCompatActivity
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            return null;
+            return results;
         }
 
         private ArrayList<MovieResult> parseResult(String result)
