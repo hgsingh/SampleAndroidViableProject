@@ -35,7 +35,7 @@ public class GridFragment extends Fragment
         View v = inflater.inflate(R.layout.frag_tab_grid, container, false);
         gridView = (GridView) v.findViewById(R.id.gridview);
 //        activity = (StarActivity) getActivity();
-        if(bitmap != null && savedInstanceState == null)
+        if(bitmap != null)
         {
             gridView.setAdapter(new ImageAdapter(context, bitmap));
         }
