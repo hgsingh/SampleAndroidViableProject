@@ -35,9 +35,16 @@ public class GridFragment extends Fragment
         View v = inflater.inflate(R.layout.frag_tab_grid, container, false);
         gridView = (GridView) v.findViewById(R.id.gridview);
 //        activity = (StarActivity) getActivity();
-        if(bitmap != null)
+        if(bitmap != null && savedInstanceState == null)
         {
             gridView.setAdapter(new ImageAdapter(context, bitmap));
+        }
+        if(savedInstanceState != null)
+        {
+            bitmap = savedInstanceState.getParcelableArrayList("BKEY");
+            if(bitmap != null)
+                gridView.setAdapter(new ImageAdapter(getContext(), bitmap));
+
         }
         else
         {
@@ -54,6 +61,13 @@ public class GridFragment extends Fragment
     {
         this.bitmap = arrayList;
     }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList("BKEY", bitmap);
+    }
+
     private class ImageAdapter extends BaseAdapter
     {
         private Context context;
