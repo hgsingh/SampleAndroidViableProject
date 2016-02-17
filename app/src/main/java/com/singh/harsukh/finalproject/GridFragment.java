@@ -44,7 +44,6 @@ public class GridFragment extends Fragment
             bitmap = savedInstanceState.getParcelableArrayList("BKEY");
             if(bitmap != null)
                 gridView.setAdapter(new ImageAdapter(getContext(), bitmap));
-
         }
         else
         {
