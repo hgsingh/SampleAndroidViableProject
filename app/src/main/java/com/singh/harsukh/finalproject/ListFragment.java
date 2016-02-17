@@ -39,7 +39,13 @@ public class ListFragment extends Fragment implements AdapterView.OnItemClickLis
         View v = (View) inflater.inflate(R.layout.frag_tab_list, container, false);
         listView = (ListView) v.findViewById(R.id.listView);
         if(arrayList != null && context != null) {
-            listView.setAdapter(new ListAdapter(context, arrayList));
+            if(savedInstanceState == null)
+                listView.setAdapter(new ListAdapter(context, arrayList));
+        }
+        if(savedInstanceState != null)
+        {
+            arrayList = savedInstanceState.getParcelableArrayList("SERIAL_KEY");
+            listView.setAdapter(new ListAdapter(getContext(), arrayList));
         }
         else
             Log.e("ListFragment", "null values");
@@ -64,4 +70,20 @@ public class ListFragment extends Fragment implements AdapterView.OnItemClickLis
         Download downloader = new Download((StarActivity)getActivity());
         downloader.execute("recentImages", _id,getResources().getString(R.string.insta_client_id));
     }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList("SERIAL_KEY", arrayList);
+    }
+
+//    @Override
+//    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+//        super.onViewStateRestored(savedInstanceState);
+//        if(savedInstanceState != null)
+//        {
+//            listView.setAdapter(new ListAdapter(context, savedInstanceState.getParcelableArrayList("SERIAL_KEY")));
+//            listView.setOnItemClickListener(this);
+//        }
+//    }
 }
