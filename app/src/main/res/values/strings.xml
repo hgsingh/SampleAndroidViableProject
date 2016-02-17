@@ -3,4 +3,6 @@
     <string name="find_movies">Find Movies</string>
     <string name="tmdb_key">cd956818d65f3ef6d3a9082d9f294a03</string>
     <string name="insta_client_id">5f9365e9f1054aa991726d731c65aa02</string>
+    <string name="drawer_open">Open</string>
+    <string name="drawer_close">Close</string>
 </resources>
