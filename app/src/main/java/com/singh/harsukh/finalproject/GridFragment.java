@@ -39,8 +39,9 @@ public class GridFragment extends Fragment
         {
             gridView.setAdapter(new ImageAdapter(context, bitmap));
         }
-        if(savedInstanceState != null)
+        if(savedInstanceState != null && bitmap == null)
         {
+            Log.d("StarActivity", "Lord Freeza da fuck?");
             bitmap = savedInstanceState.getParcelableArrayList("BKEY");
             if(bitmap != null)
                 gridView.setAdapter(new ImageAdapter(getContext(), bitmap));
