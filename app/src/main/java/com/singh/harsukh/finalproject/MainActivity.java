@@ -2,7 +2,13 @@ package com.singh.harsukh.finalproject;
 
 import android.app.Activity;
 import android.app.FragmentManager;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.IBinder;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +22,16 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -30,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements View.OnFocusChang
     private DrawerLayout drawerLayout;
     private ListView mDrawerList;
     private ArrayList<String> title = new ArrayList<>();
+    private static JSONObject jObject = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -185,4 +202,109 @@ public class MainActivity extends AppCompatActivity implements View.OnFocusChang
         }
     }
 
+    private DBService mDBService;
+    private boolean status;
+    private ServiceConnection mServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            DBService.LocalBinder binder =(DBService.LocalBinder) service;
+            mDBService = binder.getService();
+            status = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            status = false;
+        }
+    };
+
+//    public void bindService(View v)
+//    {
+//        if(v.getId() == R.id.button6)
+//        {
+//            Intent local_intent = new Intent(this, BindedService.class);
+//            //the context flag is passed because if a service doesn't exist it is automatically created
+//            bindService(local_intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+//            status = true;
+//            Toast.makeText(getApplicationContext(), "Service Binded", Toast.LENGTH_LONG).show();
+//        }
+//    }
+//
+//    public void unbindService(View v)
+//    {
+//        if(v.getId() == R.id.button7)
+//        {
+//            if(status) {
+//                unbindService(mServiceConnection);
+//                status = false;
+//                Toast.makeText(getApplicationContext(), "Service unbinded", Toast.LENGTH_LONG).show();
+//            }
+//            else
+//            {
+//                Toast.makeText(getApplicationContext(), "bind it first", Toast.LENGTH_LONG).show();
+//
+//            }
+//        }
+//    }
+//
+//    public void add(View v)
+//    {
+//        if(v.getId() == R.id.button8)
+//        {
+//            if(status)
+//            {
+//                int x = Integer.parseInt(mEditTextA.getText().toString());
+//                int y = Integer.parseInt(mEditTextB.getText().toString());
+//                int result = mBindedService.addNumbers(x,y);
+//                Toast.makeText(getApplicationContext(), "Result: "+ result, Toast.LENGTH_LONG).show();
+//            }
+//            else
+//            {
+//                Toast.makeText(getApplicationContext(), "bind service first", Toast.LENGTH_LONG).show();
+//            }
+//        }
+//    }
+
+    private class DownloadRunnable implements Runnable
+    {
+        private String _url = null;
+        public DownloadRunnable(Object param)
+        {
+            _url = (String)param;
+        }
+        @Override
+        public void run() {
+            URL downloadUrl = null; //initially set object to null
+            HttpURLConnection conn = null;
+            InputStream inputStream = null;
+            //JSONObject jsonObject = null;
+            String json = null;
+            if(_url != null) {
+                try {
+                    downloadUrl = new URL(_url);
+                    conn = (HttpURLConnection) downloadUrl.openConnection();
+                    inputStream = conn.getInputStream();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"), 1024);
+                    json = reader.readLine();
+                    System.out.println(json);
+                    //jsonObject = new JSONObject(json);
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }finally {
+                    Intent intent = new Intent();
+                    String stopThread = getApplicationContext().toString();
+                    intent.setAction("stopThread");
+                    intent.putExtra("json", json);
+                    sendBroadcast(intent);
+                }
+            }
+        }
+    }
+
+    public static void setJsonObject(JSONObject Object)
+    {
+        jObject = Object;
+    }
 }

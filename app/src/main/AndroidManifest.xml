@@ -22,6 +22,11 @@
         </activity>
         <activity android:name=".MovieSearcher">
         </activity>
+        <receiver android:name=".CustomReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="stopThread"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

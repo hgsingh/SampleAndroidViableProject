@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -80,9 +81,10 @@ public class DiscoverActivity extends AppCompatActivity implements AdapterView.O
             String _id = arrayList.get(position).getId();
             String desc = arrayList.get(position).description;
             String thumbnail_url = "https://image.tmdb.org/t/p/w500"+_id;
-
-            Thread download_thread = new Thread(new DownloadThread(thumbnail_url));
-            download_thread.start();
+            synchronized(this){
+                Thread download_thread = new Thread(new DownloadThread(thumbnail_url));
+                download_thread.start();
+            }
             FragmentManager manager = getFragmentManager();
             MovieDetailDialog detailDialog = new MovieDetailDialog();
 //            message_handler = new Handler(Looper.getMainLooper()) {
@@ -157,5 +159,18 @@ public class DiscoverActivity extends AppCompatActivity implements AdapterView.O
                 }
             }
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
+        outState.putParcelableArrayList("SERIAL_KEY", arrayList);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        arrayList = savedInstanceState.getParcelableArrayList("SERIAL_KEY");
+        listView.setAdapter(new ListAdapter(this, arrayList));
     }
 }
