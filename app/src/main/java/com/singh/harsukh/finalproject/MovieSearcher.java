@@ -54,10 +54,10 @@ public class MovieSearcher extends AppCompatActivity
         {
             query = initialization_intent.getStringExtra("movie_name");
         }
-        if(initializer.equals("genre"))
-        {
-            query = initialization_intent.getStringExtra("genre_name");
-        }
+//        if(initializer.equals("genre"))
+//        {
+//            query = initialization_intent.getStringExtra("genre_name");
+//        }
         if(query != null) {
             // Check if the NetworkConnection is active and connected.
             ConnectivityManager connMgr = (ConnectivityManager)
@@ -104,9 +104,9 @@ public class MovieSearcher extends AppCompatActivity
                         return null;
                     }
                 }
-                if (tag.equals("genre")) {
-                    //// TODO: 2/13/16  
-                }
+//                if (tag.equals("genre")) {
+//                    //// TODO: 2/13/16
+//                }
             }
             return null;
         }

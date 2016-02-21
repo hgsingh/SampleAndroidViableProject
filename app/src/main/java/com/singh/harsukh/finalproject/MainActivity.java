@@ -9,10 +9,12 @@ import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.IBinder;
+import android.support.annotation.MainThread;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -47,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements View.OnFocusChang
     private ListView mDrawerList;
     private ArrayList<String> title = new ArrayList<>();
     private static JSONObject jObject = null;
+    //private DBService service;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements View.OnFocusChang
         mEditTextC.setText("");
         mEditTextA.setOnFocusChangeListener(this);
         mEditTextB.setOnFocusChangeListener(this);
-        mEditTextB.setOnFocusChangeListener(this);
+        mEditTextC.setOnFocusChangeListener(this);
         drawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
         title.add(0, "Find Food");
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
@@ -82,8 +85,44 @@ public class MainActivity extends AppCompatActivity implements View.OnFocusChang
             }
         };
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+        bindService();
+        if(savedInstanceState == null) {
+            String thumbnail_url = "http://api.themoviedb.org/3/genre/movie/list?api_key=cd956818d65f3ef6d3a9082d9f294a03";
+            Thread download_thread = new Thread(new DownloadRunnable(thumbnail_url));
+            download_thread.start();
+        }
+        else
+        {
+            String convert = savedInstanceState.getString("json");
+            setJsonObject(convert);
+            setDBJsonWrapper();
+            Log.d("MainActivity", "it worked");
+        }
+//        synchronized (this) {
+//            try {
+//                download_thread.join();
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//        }
+    }
 
-
+    public void checkDB(View view) {
+        if(!mEditTextC.getText().toString().equals("") && jObject != null)
+        {
+            Log.e("MainActivity", "calling service method");
+            String check = mDBService.getGenre(mEditTextC.getText().toString());
+            if(check != null)
+                Toast.makeText(MainActivity.this, check, Toast.LENGTH_LONG).show();
+            else
+            {
+                Toast.makeText(MainActivity.this, "Not a valid genre", Toast.LENGTH_LONG).show();
+            }
+        }
+        else
+        {
+            Toast.makeText(MainActivity.this, mEditTextC.getText().toString(), Toast.LENGTH_LONG).show();
+        }
     }
 
     /* The click listner for ListView in the navigation drawer */
@@ -99,7 +138,9 @@ public class MainActivity extends AppCompatActivity implements View.OnFocusChang
         mDrawerList.setItemChecked(position, true);
         if(title.get(position).equals("Find Food"))
         {
-            //// TODO: 2/17/16
+            Intent intent = YelpActivity.getActivity(getApplicationContext());
+            startActivity(intent);
+
         }
     }
 
@@ -151,14 +192,6 @@ public class MainActivity extends AppCompatActivity implements View.OnFocusChang
     {
         if(arg.equals("instagram") && arrayList != null)
         {
-//            int i = 0;
-//            SingleRow reference;
-//            while(i < arrayList.size())
-//            {
-//                reference = arrayList.get(i);
-//                System.out.println(reference.title);
-//                ++i;
-//            }
             Intent intent = StarActivity.getActivity(getApplicationContext());
             intent.putExtra("imageObjects", arrayList);
             startActivity(intent);
@@ -189,27 +222,18 @@ public class MainActivity extends AppCompatActivity implements View.OnFocusChang
                 startActivity(actor_intent);
             }
         }
-        if(view.getId() == R.id.button3)
-        {
-            String query = mEditTextC.getText().toString();
-            if(!query.equals(""))
-            {
-                Intent genre_intent = MovieSearcher.getActivity(getApplicationContext());
-                genre_intent.putExtra("genre_name", query);
-                genre_intent.putExtra(query_code,"genre");
-                startActivity(genre_intent);
-            }
-        }
     }
 
-    private DBService mDBService;
-    private boolean status;
+    private static DBService mDBService = null;
+    private static boolean status;
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             DBService.LocalBinder binder =(DBService.LocalBinder) service;
             mDBService = binder.getService();
             status = true;
+            mDBService.setHelper(getApplicationContext());
+            Log.e("MainActivity", "Service bonded successfully");
         }
 
         @Override
@@ -218,52 +242,16 @@ public class MainActivity extends AppCompatActivity implements View.OnFocusChang
         }
     };
 
-//    public void bindService(View v)
-//    {
-//        if(v.getId() == R.id.button6)
-//        {
-//            Intent local_intent = new Intent(this, BindedService.class);
-//            //the context flag is passed because if a service doesn't exist it is automatically created
-//            bindService(local_intent, mServiceConnection, Context.BIND_AUTO_CREATE);
-//            status = true;
-//            Toast.makeText(getApplicationContext(), "Service Binded", Toast.LENGTH_LONG).show();
-//        }
-//    }
-//
-//    public void unbindService(View v)
-//    {
-//        if(v.getId() == R.id.button7)
-//        {
-//            if(status) {
-//                unbindService(mServiceConnection);
-//                status = false;
-//                Toast.makeText(getApplicationContext(), "Service unbinded", Toast.LENGTH_LONG).show();
-//            }
-//            else
-//            {
-//                Toast.makeText(getApplicationContext(), "bind it first", Toast.LENGTH_LONG).show();
-//
-//            }
-//        }
-//    }
-//
-//    public void add(View v)
-//    {
-//        if(v.getId() == R.id.button8)
-//        {
-//            if(status)
-//            {
-//                int x = Integer.parseInt(mEditTextA.getText().toString());
-//                int y = Integer.parseInt(mEditTextB.getText().toString());
-//                int result = mBindedService.addNumbers(x,y);
-//                Toast.makeText(getApplicationContext(), "Result: "+ result, Toast.LENGTH_LONG).show();
-//            }
-//            else
-//            {
-//                Toast.makeText(getApplicationContext(), "bind service first", Toast.LENGTH_LONG).show();
-//            }
-//        }
-//    }
+    public void bindService()
+    {
+        Intent local_intent = new Intent(this, DBService.class);
+        //the context flag is passed because if a service doesn't exist it is automatically created
+        bindService(local_intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+        status = true;
+        Log.e("MainActivity", "binding complete");
+        if(mDBService == null)
+            Log.e("MainActivity", "inside bindService", new Exception());
+    }
 
     private class DownloadRunnable implements Runnable
     {
@@ -277,7 +265,6 @@ public class MainActivity extends AppCompatActivity implements View.OnFocusChang
             URL downloadUrl = null; //initially set object to null
             HttpURLConnection conn = null;
             InputStream inputStream = null;
-            //JSONObject jsonObject = null;
             String json = null;
             if(_url != null) {
                 try {
@@ -303,8 +290,47 @@ public class MainActivity extends AppCompatActivity implements View.OnFocusChang
         }
     }
 
-    public static void setJsonObject(JSONObject Object)
+    public static void setJsonObject(String json)
     {
-        jObject = Object;
+        try {
+            jObject = new JSONObject(json);
+            Log.d("MainActivity", "json set");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void setDBJsonWrapper()
+    {
+        if(jObject!=null && status && mDBService != null) {
+            mDBService.insertJSON(jObject);
+        }
+        else
+        {
+            Log.e("MainActivity", "Something was null");
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(status) {
+            unbindService(mServiceConnection);
+            status = false;
+            Toast.makeText(getApplicationContext(), "Service unbinded", Toast.LENGTH_LONG).show();
+        }
+        else
+        {
+            Toast.makeText(getApplicationContext(), "bind it first", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if(jObject != null)
+        {
+            outState.putString("json", jObject.toString());
+        }
     }
 }

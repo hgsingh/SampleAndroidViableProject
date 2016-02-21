@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,16 +38,16 @@ public class DiscoverActivity extends AppCompatActivity implements AdapterView.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_discover);
         listView = (ListView)findViewById(R.id.listView2);
-        if(isConnected())
+        if(isConnected() && savedInstanceState == null)
         {
             Download discover_download = new Download(this);
             discover_download.execute("moviedb", getResources().getString(R.string.tmdb_key));
             Log.d("DiscoverActivity", "Task Completed");
 //            if(arrayList != null)
 //                listView.setAdapter(new ListAdapter( DiscoverActivity.this, arrayList));
-            listView.setOnItemClickListener(this);
-            message_handler = new Handler();
         }
+        listView.setOnItemClickListener(this);
+        message_handler = new Handler();
     }
 
     protected void setArrayList(ArrayList arrayList)
@@ -81,12 +82,17 @@ public class DiscoverActivity extends AppCompatActivity implements AdapterView.O
             String _id = arrayList.get(position).getId();
             String desc = arrayList.get(position).description;
             String thumbnail_url = "https://image.tmdb.org/t/p/w500"+_id;
-            synchronized(this){
+            synchronized(this) {
                 Thread download_thread = new Thread(new DownloadThread(thumbnail_url));
                 download_thread.start();
-            }
-            FragmentManager manager = getFragmentManager();
-            MovieDetailDialog detailDialog = new MovieDetailDialog();
+                thumb = getBitmap();
+                try {
+                    download_thread.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                FragmentManager manager = getFragmentManager();
+                MovieDetailDialog detailDialog = new MovieDetailDialog();
 //            message_handler = new Handler(Looper.getMainLooper()) {
 //                @Override
 //                public void handleMessage(Message msg) {
@@ -94,15 +100,15 @@ public class DiscoverActivity extends AppCompatActivity implements AdapterView.O
 //                    thumb = (Bitmap) msg.obj;
 //                }
 //            };
-            thumb = getBitmap();
 //            Message message = message_handler.obtainMessage();
 //            thumb = (Bitmap) message.obj;
-            if(thumb!=null) {
-                Log.d("DiscoverActivity", "Here I am");
-                args.putString("description", desc);
-                args.putParcelable("image", thumb);
-                detailDialog.setArguments(args);
-                detailDialog.show(manager, "MovieDetailDialog");
+                if (thumb != null) {
+                    Log.d("DiscoverActivity", "Here I am");
+                    args.putString("description", desc);
+                    args.putParcelable("image", thumb);
+                    detailDialog.setArguments(args);
+                    detailDialog.show(manager, "MovieDetailDialog");
+                }
             }
         }
     }
@@ -161,16 +167,26 @@ public class DiscoverActivity extends AppCompatActivity implements AdapterView.O
         }
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-        super.onSaveInstanceState(outState, outPersistentState);
-        outState.putParcelableArrayList("SERIAL_KEY", arrayList);
-    }
+
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         arrayList = savedInstanceState.getParcelableArrayList("SERIAL_KEY");
-        listView.setAdapter(new ListAdapter(this, arrayList));
+        if(arrayList != null){
+            listView.setAdapter(new ListAdapter(getApplicationContext(), arrayList));
+            Toast.makeText(getApplicationContext(), "arrayList has a value", Toast.LENGTH_LONG).show();
+        }
+        else
+        {
+            Toast.makeText(getApplicationContext(), "nothing was saved", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState)
+    {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList("SERIAL_KEY", arrayList);
     }
 }
