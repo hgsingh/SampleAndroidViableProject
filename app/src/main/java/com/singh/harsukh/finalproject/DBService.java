@@ -128,7 +128,6 @@ public class DBService extends Service {
         StringBuffer buffer = new StringBuffer();
         Log.e("DBService", "service called");
         while(cursor.moveToNext()){
-
             int indexId = cursor.getColumnIndex(DBHelper.GENRE_ID);
             int id = cursor.getInt(indexId);
             buffer.append("ID:"+id+"\n");

@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Build;
 import android.support.v4.app.ActivityCompat;
@@ -25,9 +26,15 @@ import com.google.android.gms.maps.GoogleMap;
 
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.singh.harsukh.yelpapilibrary.Yelp;
+
+import java.util.ArrayList;
 
 public class YelpActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
     private GoogleMap mGoogleMap;
@@ -79,9 +86,10 @@ public class YelpActivity extends AppCompatActivity implements OnMapReadyCallbac
             mGoogleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
                 @Override
                 public void onMapLongClick(LatLng latLng) {
-//                    YelpActivity.this.setMarker("Local", latLng.latitude, latLng.longitude);
+                    YelpActivity.this.setMarker("Local", latLng.latitude, latLng.longitude);
                 }
             });
+
             //custom window designed in here too
             mGoogleMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
 
@@ -97,15 +105,12 @@ public class YelpActivity extends AppCompatActivity implements OnMapReadyCallbac
                     TextView tvLocality = (TextView) v.findViewById(R.id.tv_locality);
                     TextView tvLat = (TextView) v.findViewById(R.id.tv_lat);
                     TextView tvLng = (TextView) v.findViewById(R.id.tv_lng);
-                    TextView tvSnippet = (TextView) v.findViewById(R.id.tv_snippet);
 
                     //setting the textViews  use the marker to retrieve this data
                     LatLng ll = marker.getPosition();
                     tvLocality.setText(marker.getTitle());
                     tvLat.setText("Latitude: " + ll.latitude);
                     tvLng.setText("Longitude: " + ll.longitude);
-                    tvSnippet.setText(marker.getSnippet());
-
                     return v;
                 }
             });
@@ -118,6 +123,52 @@ public class YelpActivity extends AppCompatActivity implements OnMapReadyCallbac
         mGoogleApiClient.connect();
     }
 
+    private ArrayList<Marker> markers = new ArrayList<Marker>();
+    private ArrayList<Polyline> lines = new ArrayList<Polyline>();
+    static final int POLYGON_POINTS = 20;
+
+    private void setMarker(String locality, double x, double y) {
+
+        //removing polygon if already drawn
+        if(markers.size() == POLYGON_POINTS){
+            removeEverything();}
+        //creating marker options
+        MarkerOptions options = new MarkerOptions()
+                .title(locality)
+                .draggable(true) //drag a marker
+                .position(new LatLng(x, y)); //get position of marker
+        if(locality.equals("current location")){
+            markers.add(0,mGoogleMap.addMarker(options));}
+        else{
+            markers.add(mGoogleMap.addMarker(options));}
+        if(markers.size() > 1) {
+            drawline(markers.get(0), markers.get(markers.size() - 1));
+        }
+    }
+
+    private void removeEverything() {
+        for (Marker marker : markers) {
+            marker.remove();
+        }
+        markers.clear();
+        for(Polyline line: lines)
+        {
+            line.remove();
+        }
+        lines.clear();
+    }
+
+    private void drawline(Marker marker1, Marker marker2) {
+        float[] results = new float[1];
+        Location.distanceBetween(marker1.getPosition().latitude, marker2.getPosition().latitude,marker1.getPosition().longitude,marker2.getPosition().longitude, results );
+        PolylineOptions options = new PolylineOptions()
+                                  .add(marker1.getPosition())
+                                  .add(marker2.getPosition())
+                                  .color(Color.BLUE)
+                                  .width(3);
+        lines.add(mGoogleMap.addPolyline(options));
+        Toast.makeText(YelpActivity.this, "Distance to: "+results, Toast.LENGTH_SHORT).show();
+    }
 
     @Override
     public void onConnected(Bundle bundle) {
@@ -160,6 +211,7 @@ public class YelpActivity extends AppCompatActivity implements OnMapReadyCallbac
             LatLng ll = new LatLng(location.getLatitude(), location.getLongitude());
             CameraUpdate update = CameraUpdateFactory.newLatLngZoom(ll, 15);
             mGoogleMap.animateCamera(update);
+            setMarker("current location",location.getLatitude(), location.getLongitude() );
         }
     }
 }
