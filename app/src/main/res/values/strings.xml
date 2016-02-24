@@ -5,4 +5,8 @@
     <string name="insta_client_id">5f9365e9f1054aa991726d731c65aa02</string>
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
+    <string name="yelp_consumer_key">_bT0Nzgbv4oPemJxWl-ygQ</string>
+    <string name="yelp_consumer_secret">zbOYUHNpQ6Rihr8kGeK4lb8UDWk</string>
+    <string name="yelp_token">-M249BiQw1Kv4sx_vX57-OkEPlLzHB3P</string>
+    <string name="yelp_token_secret">cF6br-SYhheURpncWslfJinMr7I</string>
 </resources>
