@@ -26,6 +26,8 @@ public class Yelp {
         this.service = new ServiceBuilder().provider(YelpOAuth.class).apiKey(clientKey).apiSecret(clientSecret).build();
         this.accessToken = new Token(token, tokenSecret);
     }
+
+
     /**
      * Search with term and location.
      *

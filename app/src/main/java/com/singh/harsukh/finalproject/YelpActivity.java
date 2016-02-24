@@ -5,12 +5,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,6 +44,9 @@ public class YelpActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleApiClient mGoogleApiClient;
     private Yelp mYelp;
     private LocationRequest mLocationRequest;
+    private EditText mEditText;
+    private Button mButton;
+    private Location current_location;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +54,9 @@ public class YelpActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (google_serv_check()) {
             setContentView(R.layout.activity_yelp);
             initMaps();
+            mEditText = (EditText) findViewById(R.id.search_text);
+            mEditText.setText("");
+            mButton = (Button) findViewById(R.id.search_button);
             mYelp = new Yelp(getResources().getString(R.string.yelp_consumer_key),getResources().getString(R.string.yelp_consumer_secret),getResources().getString(R.string.yelp_token),getResources().getString(R.string.yelp_token_secret));
         }
     }
@@ -213,5 +222,12 @@ public class YelpActivity extends AppCompatActivity implements OnMapReadyCallbac
             mGoogleMap.animateCamera(update);
             setMarker("current location",location.getLatitude(), location.getLongitude() );
         }
+    }
+
+    public void geoLocate(View v)
+    {
+        String search_term = mEditText.getText().toString();
+        Geocoder gc = new Geocoder(this); //geocoder object declared
+
     }
 }
