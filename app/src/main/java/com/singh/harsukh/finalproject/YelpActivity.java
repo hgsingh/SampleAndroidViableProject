@@ -46,7 +46,7 @@ public class YelpActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LocationRequest mLocationRequest;
     private EditText mEditText;
     private Button mButton;
-    private Location current_location;
+    private Location current_location = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,17 +137,17 @@ public class YelpActivity extends AppCompatActivity implements OnMapReadyCallbac
     static final int POLYGON_POINTS = 20;
 
     private void setMarker(String locality, double x, double y) {
-
         //removing polygon if already drawn
         if(markers.size() == POLYGON_POINTS){
             removeEverything();}
         //creating marker options
         MarkerOptions options = new MarkerOptions()
                 .title(locality)
-                .draggable(true) //drag a marker
+                .draggable(false) //drag a marker
                 .position(new LatLng(x, y)); //get position of marker
         if(locality.equals("current location")){
-            markers.add(0,mGoogleMap.addMarker(options));}
+            markers.add(0,mGoogleMap.addMarker(options));
+        }
         else{
             markers.add(mGoogleMap.addMarker(options));}
         if(markers.size() > 1) {
@@ -168,15 +168,24 @@ public class YelpActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void drawline(Marker marker1, Marker marker2) {
-        float[] results = new float[1];
-        Location.distanceBetween(marker1.getPosition().latitude, marker2.getPosition().latitude,marker1.getPosition().longitude,marker2.getPosition().longitude, results );
+        Location locationA = new Location("point A");
+
+        locationA.setLatitude(marker1.getPosition().latitude);
+        locationA.setLongitude(marker1.getPosition().longitude);
+
+        Location locationB = new Location("point B");
+
+        locationB.setLatitude(marker2.getPosition().latitude);
+        locationB.setLongitude(marker2.getPosition().longitude);
+
+        float distance = locationA.distanceTo(locationB);
         PolylineOptions options = new PolylineOptions()
                                   .add(marker1.getPosition())
                                   .add(marker2.getPosition())
                                   .color(Color.BLUE)
                                   .width(3);
         lines.add(mGoogleMap.addPolyline(options));
-        Toast.makeText(YelpActivity.this, "Distance to: "+results, Toast.LENGTH_SHORT).show();
+        Toast.makeText(YelpActivity.this, "Distance to: "+distance, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -196,6 +205,10 @@ public class YelpActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this); //updates location and listens for the location
         //calls  onLocationChanged();
+//        LatLng ll = new LatLng(location.getLatitude(), location.getLongitude());
+//        CameraUpdate update = CameraUpdateFactory.newLatLngZoom(ll, 15);
+//        mGoogleMap.animateCamera(update);
+//        setMarker("current location", location.getLatitude(), location.getLongitude());
     }
 
     @Override
@@ -218,9 +231,27 @@ public class YelpActivity extends AppCompatActivity implements OnMapReadyCallbac
         else
         {
             LatLng ll = new LatLng(location.getLatitude(), location.getLongitude());
-            CameraUpdate update = CameraUpdateFactory.newLatLngZoom(ll, 15);
-            mGoogleMap.animateCamera(update);
-            setMarker("current location",location.getLatitude(), location.getLongitude() );
+
+
+            if(current_location == null)
+            {
+                current_location = location;
+                CameraUpdate update = CameraUpdateFactory.newLatLngZoom(ll, 15);
+                mGoogleMap.animateCamera(update);
+                setMarker("current location", location.getLatitude(), location.getLongitude());
+            }
+            else {
+                float[] result = new float[1];
+                Location.distanceBetween(current_location.getLatitude(), current_location.getLongitude(), location.getLatitude(), location.getLongitude(), result);
+                if(Math.round(result[0]) > 200)
+                {
+                    current_location = location;
+                    if(markers.get(0) != null) {
+                        markers.remove(0);
+                    }
+                    setMarker("current location", location.getLatitude(), location.getLongitude());
+                }
+            }
         }
     }
 
