@@ -11,6 +11,7 @@ import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -37,12 +38,22 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.singh.harsukh.yelpapilibrary.Yelp;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 
 public class YelpActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
     private GoogleMap mGoogleMap;
     private GoogleApiClient mGoogleApiClient;
-    private Yelp mYelp;
     private LocationRequest mLocationRequest;
     private EditText mEditText;
     private Button mButton;
@@ -57,7 +68,6 @@ public class YelpActivity extends AppCompatActivity implements OnMapReadyCallbac
             mEditText = (EditText) findViewById(R.id.search_text);
             mEditText.setText("");
             mButton = (Button) findViewById(R.id.search_button);
-            mYelp = new Yelp(getResources().getString(R.string.yelp_consumer_key),getResources().getString(R.string.yelp_consumer_secret),getResources().getString(R.string.yelp_token),getResources().getString(R.string.yelp_token_secret));
         }
     }
 
@@ -95,7 +105,7 @@ public class YelpActivity extends AppCompatActivity implements OnMapReadyCallbac
             mGoogleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
                 @Override
                 public void onMapLongClick(LatLng latLng) {
-                    YelpActivity.this.setMarker("Local", latLng.latitude, latLng.longitude);
+                    YelpActivity.this.setMarker(latLng.toString(), latLng.latitude, latLng.longitude);
                 }
             });
 
@@ -114,12 +124,24 @@ public class YelpActivity extends AppCompatActivity implements OnMapReadyCallbac
                     TextView tvLocality = (TextView) v.findViewById(R.id.tv_locality);
                     TextView tvLat = (TextView) v.findViewById(R.id.tv_lat);
                     TextView tvLng = (TextView) v.findViewById(R.id.tv_lng);
-
+                    TextView dist = (TextView) v.findViewById(R.id.tv_dist);
                     //setting the textViews  use the marker to retrieve this data
                     LatLng ll = marker.getPosition();
                     tvLocality.setText(marker.getTitle());
                     tvLat.setText("Latitude: " + ll.latitude);
                     tvLng.setText("Longitude: " + ll.longitude);
+                    if(current_location != null)
+                    {
+                        Location set_ll = new Location(marker.getTitle());
+                        set_ll.setLatitude(ll.latitude);
+                        set_ll.setLongitude(ll.longitude);
+                        float distance = current_location.distanceTo(set_ll);
+                        dist.setText("Distance to: " + distance);
+                    }
+                    else
+                    {
+                        dist.setText("Distance to: ????");
+                    }
                     return v;
                 }
             });
@@ -134,7 +156,7 @@ public class YelpActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private ArrayList<Marker> markers = new ArrayList<Marker>();
     private ArrayList<Polyline> lines = new ArrayList<Polyline>();
-    static final int POLYGON_POINTS = 20;
+    static final int POLYGON_POINTS = 100;
 
     private void setMarker(String locality, double x, double y) {
         //removing polygon if already drawn
@@ -205,20 +227,14 @@ public class YelpActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this); //updates location and listens for the location
         //calls  onLocationChanged();
-//        LatLng ll = new LatLng(location.getLatitude(), location.getLongitude());
-//        CameraUpdate update = CameraUpdateFactory.newLatLngZoom(ll, 15);
-//        mGoogleMap.animateCamera(update);
-//        setMarker("current location", location.getLatitude(), location.getLongitude());
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-
     }
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-
     }
 
     @Override
@@ -241,9 +257,8 @@ public class YelpActivity extends AppCompatActivity implements OnMapReadyCallbac
                 setMarker("current location", location.getLatitude(), location.getLongitude());
             }
             else {
-                float[] result = new float[1];
-                Location.distanceBetween(current_location.getLatitude(), current_location.getLongitude(), location.getLatitude(), location.getLongitude(), result);
-                if(Math.round(result[0]) > 200)
+                float distance =  current_location.distanceTo(location);
+                if(Math.round(distance) > 100)
                 {
                     current_location = location;
                     if(markers.get(0) != null) {
@@ -258,7 +273,51 @@ public class YelpActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void geoLocate(View v)
     {
         String search_term = mEditText.getText().toString();
-        Geocoder gc = new Geocoder(this); //geocoder object declared
+        if(!search_term.equals("") && current_location != null) {
+            Thread print_thread = new Thread(new YelpRunnable(new Yelp(getResources().getString(R.string.yelp_consumer_key),getResources().getString(R.string.yelp_consumer_secret),getResources().getString(R.string.yelp_token),getResources().getString(R.string.yelp_token_secret)), search_term));
+            print_thread.start();
+        }
+    }
 
+    public void processJson(String jsonStuff) throws JSONException {
+        JSONObject json = new JSONObject(jsonStuff);
+        JSONArray businesses = json.getJSONArray("businesses");
+        //ArrayList<String> businessNames = new ArrayList<String>(businesses.length());
+        for (int i = 0; i < businesses.length(); i++) {
+            JSONObject business = businesses.getJSONObject(i);
+            JSONObject coordinates =  business.getJSONObject("location").getJSONObject("coordinate");
+           // businessNames.add(business.getString("name"));
+            setMarker(business.getString("name"), Double.parseDouble(coordinates.getString("latitude")), Double.parseDouble(coordinates.getString("longitude")));
+
+        }
+        //return TextUtils.join("\n", businessNames);
+    }
+
+    private class YelpRunnable implements Runnable
+    {
+        private Yelp yelp_object = null;
+        private String search_term;
+        public YelpRunnable(Yelp param, String search_term)
+        {
+            yelp_object = param;
+            this.search_term = search_term;
+        }
+        @Override
+        public void run() {
+            final String json = yelp_object.search(search_term, current_location.getLatitude(), current_location.getLongitude());
+            //this is made because the UI thread needs to receive the information
+            //so this data is passed between the threads using the method shown.
+
+                    YelpActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                processJson(json);
+                            } catch (JSONException e) {
+                                return;
+                            }
+                        }
+                    });
+        }
     }
 }
