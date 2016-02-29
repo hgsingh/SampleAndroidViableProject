@@ -38,10 +38,6 @@ public class StarActivity extends AppCompatActivity {
 //            setImages(list_images);
     }
 
-//    public void setImages(ArrayList<SingleRow> images)
-//    {
-//        listView.setAdapter(new ListAdapter(this, images));
-//    }
 
     public static Intent getActivity(Context context)
     {
@@ -57,14 +53,6 @@ public class StarActivity extends AppCompatActivity {
         viewPager.setCurrentItem(1, true);
     }
 
-//    public ArrayList<Bitmap> getUser_images()
-//    {
-//        if(user_images != null)
-//        {
-//            return user_images;
-//        }
-//        return null;
-//    }
 
     class ListGridAdapter extends FragmentStatePagerAdapter
     {

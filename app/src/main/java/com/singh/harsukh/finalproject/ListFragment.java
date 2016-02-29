@@ -76,14 +76,4 @@ public class ListFragment extends Fragment implements AdapterView.OnItemClickLis
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList("SERIAL_KEY", arrayList);
     }
-
-//    @Override
-//    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
-//        super.onViewStateRestored(savedInstanceState);
-//        if(savedInstanceState != null)
-//        {
-//            listView.setAdapter(new ListAdapter(context, savedInstanceState.getParcelableArrayList("SERIAL_KEY")));
-//            listView.setOnItemClickListener(this);
-//        }
-//    }
 }
