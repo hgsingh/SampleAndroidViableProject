@@ -36,7 +36,7 @@ public class BluetoothDialog extends DialogFragment {
         {
              //Loop through paired devices
             for (BluetoothDevice device : pairedDevices) {
-                // Add the name and address to an array adapter to show in a ListView
+                // Add the name and address to an array list to show in a ListView
                 String address  =device.getAddress();
                 String name  = device.getName();
                 int type = device.getBondState();
