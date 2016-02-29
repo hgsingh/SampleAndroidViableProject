@@ -1,6 +1,7 @@
 package com.singh.harsukh.finalproject;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -12,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -23,6 +25,8 @@ public class StarActivity extends AppCompatActivity {
     private ViewPager viewPager;
     private ArrayList<Bitmap> user_images = null;
     private ListGridAdapter adapter;
+    private BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+    private final int REQUEST_ENABLE_BT = 900;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,6 +40,14 @@ public class StarActivity extends AppCompatActivity {
         list_images = getIntent().getParcelableArrayListExtra("imageObjects");
 //        if(list_images != null)
 //            setImages(list_images);
+        if(mBluetoothAdapter == null)
+        {
+            Toast.makeText(this, "This device does not support Bluetooth", Toast.LENGTH_LONG).show();
+        }
+        if (!mBluetoothAdapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        }
     }
 
 
@@ -71,7 +83,6 @@ public class StarActivity extends AppCompatActivity {
             if(position == 0)
             {
                 Log.e("StarActivity","Fragment at position: "+ position);
-                //// TODO: 2/7/16
                 ListFragment.setContext(context);
                 reference = new ListFragment();
                 //pointer.instantiate(StarActivity.this, ListFragment.class.toString());
@@ -83,13 +94,13 @@ public class StarActivity extends AppCompatActivity {
             if(position == 1)
             {
                 Log.e("StarActivity", "Fragment at position: " + position);
-                //// TODO: 2/7/16
                 GridFragment.setContext(context);
 
                 reference = new GridFragment();
                 if(user_images != null)
                 {
                     ((GridFragment) reference).setBitmap(user_images);
+                    ((GridFragment) reference).setBluetoothAdapter(mBluetoothAdapter);
                 }
             }
             return reference;
