@@ -94,6 +94,7 @@ public class GridFragment extends Fragment implements AdapterView.OnItemClickLis
 //                }
                 FragmentManager manager = getFragmentManager();
                 BluetoothDialog dialog = new BluetoothDialog();
+                dialog.setPairedDevices(pairedDevices);
                 dialog.show(manager, "dialog");
 
             }
