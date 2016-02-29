@@ -87,16 +87,11 @@ public class GridFragment extends Fragment implements AdapterView.OnItemClickLis
         {
             Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices(); //get a set of bluetooth devices
             if (pairedDevices.size() > 0) {
-                // Loop through paired devices
-//                for (BluetoothDevice device : pairedDevices) {
-//                    // Add the name and address to an array adapter to show in a ListView
-//                    mArrayAdapter.add(device.getName() + "\n" + device.getAddress());
-//                }
                 FragmentManager manager = getFragmentManager();
                 BluetoothDialog dialog = new BluetoothDialog();
                 dialog.setPairedDevices(pairedDevices);
+                dialog.setContext(context);
                 dialog.show(manager, "dialog");
-
             }
         }
     }
