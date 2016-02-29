@@ -17,7 +17,9 @@ public class BluetoothDialog extends DialogFragment {
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-
-        return container;
+        View v = inflater.inflate(R.layout.bluetooth_dialog, container);
+        setCancelable(true);
+        getDialog().setTitle("Paired Devices");
+        return v;
     }
 }
