@@ -108,7 +108,9 @@ public class GridFragment extends Fragment implements AdapterView.OnItemClickLis
                 //dialog.setTextRows(textRows);
                 outBundle.putParcelableArrayList("textrows", textRows);
                 outBundle.putParcelable("image", bitmap_to_send);
+                dialog.setBluetoothAdapter(mBluetoothAdapter);
                 dialog.setArguments(outBundle);
+                dialog.setCancelable(false);
                 dialog.show(manager, "dialog");
             }
         }
@@ -133,7 +135,9 @@ public class GridFragment extends Fragment implements AdapterView.OnItemClickLis
 
         @Override
         public Object getItem(int position) {
-            return imageArray.get(position);
+            if(imageArray != null)
+                return imageArray.get(position);
+            return null;
         }
 
         @Override
