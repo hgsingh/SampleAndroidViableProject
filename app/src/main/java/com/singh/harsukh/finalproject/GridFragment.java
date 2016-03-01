@@ -3,7 +3,10 @@ package com.singh.harsukh.finalproject;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -31,6 +34,8 @@ public class GridFragment extends Fragment implements AdapterView.OnItemClickLis
     private static Context context;
     private ArrayList<Bitmap> bitmap;
     private static BluetoothAdapter mBluetoothAdapter = null;
+    private ArrayList<TextRow> textRows = new ArrayList<>();
+
     public GridFragment()
     {
         super();
@@ -57,6 +62,7 @@ public class GridFragment extends Fragment implements AdapterView.OnItemClickLis
         {
             Log.e("StarActivity", "Lord Freeza da fuck?");
         }
+        context.registerReceiver(mBroadcastReceiver, filter); // Don't forget to unregister during onDestroy
         return v;
     }
     public static void setContext(Context local_context)
@@ -85,12 +91,19 @@ public class GridFragment extends Fragment implements AdapterView.OnItemClickLis
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if(mBluetoothAdapter != null)
         {
-            Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices(); //get a set of bluetooth devices
-            if (pairedDevices.size() > 0) {
+//            Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices(); //get a set of bluetooth devices
+//            if (pairedDevices.size() > 0) {
+//                FragmentManager manager = getFragmentManager();
+//                BluetoothDialog dialog = new BluetoothDialog();
+//                dialog.setPairedDevices(pairedDevices);
+//                dialog.setContext(context);
+//                dialog.show(manager, "dialog");
+//            }
+            if(textRows != null) {
                 FragmentManager manager = getFragmentManager();
                 BluetoothDialog dialog = new BluetoothDialog();
-                dialog.setPairedDevices(pairedDevices);
                 dialog.setContext(context);
+                dialog.setTextRows(textRows);
                 dialog.show(manager, "dialog");
             }
         }
@@ -141,4 +154,21 @@ public class GridFragment extends Fragment implements AdapterView.OnItemClickLis
             return imageView;
         }
     }
+
+    //create a receiver action found intent
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            //when discovery finds a device
+            if(BluetoothDevice.ACTION_FOUND == action)
+            {
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                TextRow row = new TextRow(device.getName(), device.getBondState(), device.getAddress());
+                textRows.add(row);
+            }
+        }
+    };
+    // Register the BroadcastReceiver
+    IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
 }

@@ -32,19 +32,19 @@ public class BluetoothDialog extends DialogFragment {
         ListView list = (ListView) v.findViewById(R.id.bluetooth_id);
         setCancelable(true);
         getDialog().setTitle("Paired Devices");
-        if(pairedDevices != null)
-        {
-             //Loop through paired devices
-            for (BluetoothDevice device : pairedDevices) {
-                // Add the name and address to an array list to show in a ListView
-                String address  =device.getAddress();
-                String name  = device.getName();
-                int type = device.getBondState();
-                TextRow row = new TextRow(name, type, address);
-                textRows.add(row);
-            }
-        }
-        if(context != null)
+//        if(pairedDevices != null)
+//        {
+//             //Loop through paired devices
+//            for (BluetoothDevice device : pairedDevices) {
+//                // Add the name and address to an array list to show in a ListView
+//                String address  =device.getAddress();
+//                String name  = device.getName();
+//                int type = device.getBondState();
+//                TextRow row = new TextRow(name, type, address);
+//                textRows.add(row);
+//            }
+//        }
+        if(context != null && textRows != null)
         {
             list.setAdapter(new TextArrayAdapter(context, textRows));
         }
@@ -61,6 +61,10 @@ public class BluetoothDialog extends DialogFragment {
         this.context = context;
     }
 
+    public void setTextRows(ArrayList arrayList)
+    {
+        textRows = arrayList;
+    }
 
     private class TextArrayAdapter extends ArrayAdapter
     {
