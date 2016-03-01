@@ -89,6 +89,7 @@ public class GridFragment extends Fragment implements AdapterView.OnItemClickLis
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Bundle outBundle = new Bundle();
         if(mBluetoothAdapter != null)
         {
 //            Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices(); //get a set of bluetooth devices
@@ -104,7 +105,10 @@ public class GridFragment extends Fragment implements AdapterView.OnItemClickLis
                 FragmentManager manager = getFragmentManager();
                 BluetoothDialog dialog = new BluetoothDialog();
                 dialog.setContext(context);
-                dialog.setTextRows(textRows);
+                //dialog.setTextRows(textRows);
+                outBundle.putParcelableArrayList("textrows", textRows);
+                outBundle.putParcelable("image", bitmap_to_send);
+                dialog.setArguments(outBundle);
                 dialog.show(manager, "dialog");
             }
         }

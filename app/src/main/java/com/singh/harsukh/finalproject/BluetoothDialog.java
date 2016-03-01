@@ -3,6 +3,7 @@ package com.singh.harsukh.finalproject;
 import android.app.FragmentManager;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
@@ -23,7 +24,7 @@ public class BluetoothDialog extends DialogFragment {
     public BluetoothDialog() {
         super();
     }
-    private Set<BluetoothDevice> pairedDevices = null;
+    //private Set<BluetoothDevice> pairedDevices = null;
     private Context context;
     private ArrayList<TextRow> textRows = null;
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -44,6 +45,9 @@ public class BluetoothDialog extends DialogFragment {
 //                textRows.add(row);
 //            }
 //        }
+        textRows = getArguments().getParcelableArrayList("textrows");
+        Bitmap bm = getArguments().getParcelable("image");
+        //set the bluetooth to send here
         if(context != null && textRows != null)
         {
             list.setAdapter(new TextArrayAdapter(context, textRows));
@@ -51,20 +55,20 @@ public class BluetoothDialog extends DialogFragment {
         return v;
     }
 
-    public void setPairedDevices(Set<BluetoothDevice> devices)
-    {
-        pairedDevices = devices;
-    }
+//    public void setPairedDevices(Set<BluetoothDevice> devices)
+//    {
+//        pairedDevices = devices;
+//    }
 
     public void setContext(Context context)
     {
         this.context = context;
     }
 
-    public void setTextRows(ArrayList arrayList)
-    {
-        textRows = arrayList;
-    }
+//    public void setTextRows(ArrayList arrayList)
+//    {
+//        textRows = arrayList;
+//    }
 
     private class TextArrayAdapter extends ArrayAdapter
     {
