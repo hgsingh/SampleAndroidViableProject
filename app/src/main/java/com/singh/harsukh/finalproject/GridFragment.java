@@ -35,7 +35,7 @@ public class GridFragment extends Fragment implements AdapterView.OnItemClickLis
     private ArrayList<Bitmap> bitmap;
     private static BluetoothAdapter mBluetoothAdapter = null;
     private ArrayList<TextRow> textRows = new ArrayList<>();
-
+    private Bitmap bitmap_to_send;
     public GridFragment()
     {
         super();
@@ -99,6 +99,7 @@ public class GridFragment extends Fragment implements AdapterView.OnItemClickLis
 //                dialog.setContext(context);
 //                dialog.show(manager, "dialog");
 //            }
+            bitmap_to_send = (Bitmap)gridView.getItemAtPosition(position);
             if(textRows != null) {
                 FragmentManager manager = getFragmentManager();
                 BluetoothDialog dialog = new BluetoothDialog();
@@ -128,7 +129,7 @@ public class GridFragment extends Fragment implements AdapterView.OnItemClickLis
 
         @Override
         public Object getItem(int position) {
-            return null;
+            return imageArray.get(position);
         }
 
         @Override
