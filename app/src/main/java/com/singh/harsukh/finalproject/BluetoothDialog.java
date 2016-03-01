@@ -189,6 +189,7 @@ public class BluetoothDialog extends DialogFragment implements AdapterView.OnIte
                 outStream.write(b);
                 outStream.flush();
             } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
